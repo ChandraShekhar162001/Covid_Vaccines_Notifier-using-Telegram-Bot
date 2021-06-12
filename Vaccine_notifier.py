@@ -5,7 +5,7 @@ base_url="https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarB
 now=datetime.now()
 today_date=now.strftime("%d-%m-%Y")
 group_id="surat_corporation"
-api_telegram="https://api.telegram.org/bot1748658539:AAG3tabLdWBU06BCFe5Ho5AF4gOmc0lJPCI/sendMessage?chat_id=@__groupid__&text"
+api_telegram="https://api.telegram.org/bot1748658539:AAG3tabLdWBU06BCFe5Ho5AF4gOmc0lJPCI/sendMessage?chat_id=@__groupid__&text=Vaccination Centers for 18-44 age group:"
 
 Gujarat_District_id={776}
 
@@ -28,17 +28,17 @@ def fetch_data_for_state(district_id):
 
 def extract_availability_data(response):
   response_json=response.json()
-  for centers in response_json["centers"]:
-    for session in centers["sessions"]:
-      if session["available_capacity_dose1"]>0 and session["Minimum_age_limit"]==45:
-        message="pincode:{}, Name:{}, Slots:{}, minimum Age:{}".format(center["pincode"],
-        center["center_id"],center["name"],session["available_capacity_dose1"],session["Minimum_age_limit"])
+  for center in response_json["centers"]:
+    for session in center["sessions"]:
+      if session["available_capacity_dose1"]>0 and session["min_age_limit"]<=45:
+        message="\n {} ({}) - Pin:{},\n Vaccine: {},\n Cost: {} \n Total {} slots are available for dose 1 on {}\n (Dose1: {}, Dose2: {}) ".format(
+            center["name"],center["block_name"],center["pincode"],session["vaccine"],center["fee_type"],session["available_capacity_dose1"],session["date"],session["available_capacity_dose1"],session["available_capacity_dose2"])
         send_message_telegram(message)
 
 def send_message_telegram(message):
-  final_telegram_url=api_telegram.replace("__groupid__",group_id)
+  final_telegram_url=api_telegram.replace("__groupid__", group_id)
   final_telegram_url=final_telegram_url+message
-  response=request.get(final_telegram_url)
+  response=requests.get(final_telegram_url)
   print(response)
 
 if __name__=="__main__":
